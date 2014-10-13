@@ -109,7 +109,7 @@ def generate_report(results):
     if args.output:
         base = args.output
     else:
-        base = results.name
+        base = '+'.join(map(lambda x:x.name, results))
     filename = '%s.txt' % base
 
     with open(filename, 'w') as f:
