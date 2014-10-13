@@ -1,10 +1,18 @@
 """
+Mossum is a tool for summarizing results from Stanford's Moss. The tool
+generates a graph for (multiple) results from Moss, which can help in
+identifying groups of students that have shared solutions.
+
+The tool can also generate a report, which shows which solutions are similar
+between all pairs of students. When submitting multiple parts of an assignment
+to Moss, this can help in identifying which students have multiple similar
+solutions.
 """
+
 import re
 import sys
 import os
 import datetime
-import pdb
 import pydot
 import argparse
 import requests as r
@@ -190,13 +198,14 @@ def main():
         if args.anonymize:
             anonymize(merged.matches)
         image(merged)
-        if args.report:
-            generate_report(all_res)
     else:
         for res in all_res:
             if args.anonymize:
                 anonymize(res.matches)
             image(res)
+
+    if args.report:
+        generate_report(all_res)
 
 if __name__ == '__main__':
     main()
