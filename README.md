@@ -21,7 +21,7 @@ Installation
 The script can be installed via `pip`:
 
 ```
-pip install --allow-all-external --process-dependency-links /home/hjalti/doc/dev/mossilicious/mossum
+pip install --allow-all-external --process-dependency-links git+https://github.com/hjalti/mossum@master
 ```
 
 (The `--process-dependency-links` will be deprecated in pip 1.6, but hopefully
