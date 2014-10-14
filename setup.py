@@ -21,5 +21,8 @@ setup(
         "requests>=2.4.3",
         "six>=1.8.0",
     ],
+    dependency_links = [
+        "git+https://github.com/nlhepler/pydot/#egg=pydot-1.0.29"
+    ],
 )
 
