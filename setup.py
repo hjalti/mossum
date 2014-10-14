@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='mossum',
-    version='0.1.0',
+    version='0.1.1',
     author='Hjalti Magnússon',
     author_email='hjaltmann@gmail.com',
     packages=['mossum'],

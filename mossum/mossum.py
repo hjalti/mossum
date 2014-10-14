@@ -41,12 +41,22 @@ parser.add_argument('--show-links', '-s', default=False, dest='show_links', acti
                    help='Add hyperlinks to graph edges to Moss results. Only works for the formats svg and xlib.')
 parser.add_argument('--output', '-o', default=None,
                    help='Name of output file.')
+parser.add_argument('--filter', metavar='N', nargs='+', default=None,
+                   help='Include only matches between these names.')
+parser.add_argument('--filteri', metavar='N', nargs='+', default=None,
+                   help='Include only matches involving these names.')
+parser.add_argument('--filterx', metavar='N', nargs='+', default=None,
+                   help='Exclude matches between these names.')
+parser.add_argument('--filterxi', metavar='N', nargs='+', default=None,
+                   help='Exclude matches involving any of these names.')
 args = None
+
 
 class Results:
     def __init__(self, name, matches):
         self.name = name
         self.matches = matches
+
 
 class Match:
     def __init__(self, first, second, lines, url):
@@ -55,10 +65,41 @@ class Match:
         self.lines = lines
         self.url = url
 
+
 class File:
     def __init__(self, name, percent):
         self.name = name
         self.percent = percent
+
+
+class Filter:
+    def __init__(self):
+        filters = ['filter', 'filteri', 'filterx', 'filterxi']
+        for f in filters:
+            setattr(self, f, None)
+
+        for f in filters:
+            if getattr(args, f) != None:
+                setattr(self, f, set(getattr(args, f)))
+
+    def include(self, match):
+        first = match.first.name
+        second = match.second.name
+        if (self.filter is not None and (first not in self.filter or second not
+            in self.filter)):
+            return False
+        if (self.filteri is not None and (first not in self.filteri and second
+            not in self.filteri)):
+            return False
+        if (self.filterx is not None and (first in self.filterx and second in
+            self.filterx)):
+            return False
+        if (self.filterxi is not None and (first in self.filterxi or second in
+            self.filterxi)):
+            return False
+        return match.lines > args.min_lines and (match.first.percent > args.min_percent  or
+                match.second.percent > args.min_percent)
+
 
 def date_str():
     return datetime.datetime.today().strftime('%d-%m-%Y_%H%M%S')
@@ -75,9 +116,6 @@ def parse_col(col):
     per = int(re.search(r'\d+',per).group())
     return File(name, per)
 
-def cond(match):
-    return match.lines > args.min_lines  and (match.first.percent > args.min_percent  or
-            match.second.percent > args.min_percent )
 
 def random_names(length):
     fake = Faker()
@@ -87,6 +125,7 @@ def random_names(length):
         names.add(fake.word())
 
     return names
+
 
 def anonymize(matches):
     s = set()
@@ -99,6 +138,7 @@ def anonymize(matches):
     for m in matches:
         m.first.name = new_names[m.first.name]
         m.second.name = new_names[m.second.name]
+
 
 def generate_report(results):
     pairs = defaultdict(list)
@@ -121,10 +161,12 @@ def generate_report(results):
 
             f.write('\n\n')
 
+
 def merge_results(results):
     name = '+'.join(map(lambda x:x.name, results))
     matches = sum(map(lambda x:x.matches, results), [])
     return Results(name, matches)
+
 
 def get_results(moss_url):
     resp = r.get(moss_url)
@@ -147,7 +189,8 @@ def get_results(moss_url):
         url = row.a['href']
         matches.append(Match(first, second, lines, url))
 
-    matches = list(filter(cond,matches))
+    fil = Filter()
+    matches = list(filter(fil.include,matches))
 
     return Results(name, matches)
 
@@ -206,6 +249,7 @@ def main():
 
     if args.report:
         generate_report(all_res)
+
 
 if __name__ == '__main__':
     main()

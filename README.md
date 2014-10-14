@@ -158,3 +158,21 @@ matches found by Moss, which represent each edge, can be opened by clicking the
 If you are using X, you can specify the format `xlib`. In this case mossum
 displays the graph in an Xlib window, and the graph is therefore not saved to
 a file.
+
+### Filters
+
+It is possible to to add or remove a name from the collection of assignments
+using filters. There are four filter options, all of which take a list of names
+as arguments. The following filters are available.
+
+* `--filter   N1 N2 ... Nn`: Only show connections between the specified names.
+No other connections are shown.
+
+* `--filteri  N1 N2 ... Nn`: Only show connections including at least one of
+specified names. No other connections are shown.
+
+* `--filterx  N1 N2 ... Nn`: Do not show connections between the specified
+names. All other connections are shown.
+
+* `--filterxi N1 N2 ... Nn`: Do not show connections where one of the specified
+names is involved. All other connections are shown.
