@@ -44,7 +44,7 @@ flag).
 
 By default mossum only shows a link between two submissions if the match Moss
 finds
-* accounts for more than 90% of either submission, or
+* accounts for more than 90% of either submission, and
 * accounts for more than one line of either submission.
 
 The percentage and number of lines can be changed using the `--min-percent`
