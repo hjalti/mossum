@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Mossum is a tool for summarizing results from Stanford's Moss. The tool
 generates a graph for (multiple) results from Moss, which can help in
