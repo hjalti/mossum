@@ -21,11 +21,8 @@ Installation
 The script can be installed via `pip`:
 
 ```
-pip install --allow-all-external --process-dependency-links git+https://github.com/hjalti/mossum@master
+pip install git+https://github.com/hjalti/mossum@master
 ```
-
-(The `--process-dependency-links` will be deprecated in pip 1.6, but hopefully
-pydot will have support for Python 3 in PyPI by then)
 
 Basic usage
 -----------
