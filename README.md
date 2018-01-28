@@ -92,7 +92,7 @@ assignment1/1337/sarah37/a1_part2.cpp
 assignment1/1337/sarah37/a13.cpp
 ```
 
-the student ID can be extracted using the regular expression `*./(.+)/.*` and
+the student ID can be extracted using the regular expression `.*/(.+)/.*` and
 if we want the name to contain the assignment name and the student ID, we can
 use the regular expression `(.*)/.*/(.*)/.*`.
 
