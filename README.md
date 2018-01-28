@@ -96,7 +96,7 @@ the student ID can be extracted using the regular expression `*./(.+)/.*` and
 if we want the name to contain the assignment name and the student ID, we can
 use the regular expression `(.*)/.*/(.*)/.*`.
 
-By extracting only the students' usernames from the path, the output might look something like this.
+By extracting only the students' IDs from the path, the output might look something like this.
 
 ![Example](example1.png?raw=true "Example")
 
