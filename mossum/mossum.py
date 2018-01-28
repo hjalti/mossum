@@ -40,10 +40,14 @@ parser.add_argument('--merge', '-m', default=False, action='store_true',
                    help='Merge all reports into one image')
 parser.add_argument('--report', '-r', default=False, action='store_true',
                    help='Generates a report showing how many submissions each pair has in common.')
-parser.add_argument('--show-links', '-s', default=False, dest='show_links', action='store_true',
-                   help='Add hyperlinks to graph edges to Moss results. Only works for the formats svg and xlib.')
+parser.add_argument('--hide-labels', default=False, action='store_true',
+                   help='Hide edge labels, which otherwise show the percentage and lines of code matches have in common')
+parser.add_argument('--show-links', default=False, action='store_true',
+                   help='DEPRECATED: Labels with links are shown by default, use --hide-labels to hide them')
 parser.add_argument('--output', '-o', default=None,
                    help='Name of output file.')
+parser.add_argument('--show-loops', default=False, action='store_true',
+                   help='Include loops in the output graph')
 parser.add_argument('--filter', metavar='N', nargs='+', default=None,
                    help='Include only matches between these names.')
 parser.add_argument('--filteri', metavar='N', nargs='+', default=None,
@@ -52,7 +56,6 @@ parser.add_argument('--filterx', metavar='N', nargs='+', default=None,
                    help='Exclude matches between these names.')
 parser.add_argument('--filterxi', metavar='N', nargs='+', default=None,
                    help='Exclude matches involving any of these names.')
-args = None
 
 
 class Results:
@@ -67,6 +70,10 @@ class Match:
         self.second = second
         self.lines = lines
         self.url = url
+
+    @property
+    def percent(self):
+        return max(self.first.percent, self.second.percent)
 
 
 class File:
@@ -125,9 +132,22 @@ def random_names(length):
 
     names = set()
     while len(names) < length:
-        names.add(fake.word())
+        names.add(fake.first_name())
 
     return names
+
+
+def link_color(ratio):
+    high = 0xE9, 0x01, 0x01
+    low = 0xFF, 0xE3, 0x05
+
+    # Normalized ratio
+    if args.min_percent != 100:
+        min_ratio = args.min_percent / 100
+        ratio = (ratio - min_ratio) / (1 - min_ratio)
+
+    color = [h * ratio + l * (1 - ratio) for h,l in zip(high, low)]
+    return '#' + ''.join(hex(int(c))[2:].zfill(2) for c in color)
 
 
 def anonymize(matches):
@@ -203,12 +223,21 @@ def image(results):
 
     print('Generating image for %s' % results.name)
     for m in results.matches:
-        extra_opts = {}
-        if args.show_links:
-            extra_opts = {'label': 'M',
-                    'labelURL': m.url,
-                    'URL': m.url}
-        graph.add_edge(pydot.Edge(m.first.name, m.second.name, **extra_opts))
+        ratio = m.percent / 100
+        color = link_color(ratio)
+        extra_opts = {
+            'color': color,
+            'penwidth': 3,
+        }
+        if not args.hide_labels:
+            extra_opts.update({
+                'label': '{0}% ({1})'.format(m.percent, m.lines),
+                'labelURL': m.url,
+                'URL': m.url,
+                'fontcolor': color,
+            })
+        if m.first.name != m.second.name or args.show_loops:
+            graph.add_edge(pydot.Edge(m.first.name, m.second.name, **extra_opts))
 
     if args.output:
         name = args.output
