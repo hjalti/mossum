@@ -166,7 +166,9 @@ a file.
 
 Edge labels can be hidden with the `--hide-labels` flag.
 
-### Filters
+## Filters
+
+### Node filters
 
 It is possible to to add or remove a name from the collection of assignments
 using filters. There are four filter options, all of which take a list of names
@@ -183,3 +185,17 @@ names. All other connections are shown.
 
 * `--filterxi N1 N2 ... Nn`: Do not show connections where one of the specified
 names is involved. All other connections are shown.
+
+### Edge filters
+
+It is also possible to filter out nodes that are connected by more than one
+edge using the `--min-edges` option. This is only applicable to merged results.
+This can be useful, e.g., in assignments with multiple problems. Submissions to
+each problem can then submitted to Moss separately. Merging these results can
+lead to a lot of noise. For example, like this.
+
+![Example 2](example2_all.png?raw=true "Example")
+
+Applying `--min-edges 2` highlights students sharing more than one solution.
+
+![Example 2](example2_pruned.png?raw=true "Example")

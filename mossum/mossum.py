@@ -22,15 +22,16 @@ import requests as r
 
 from bs4 import BeautifulSoup
 from faker import Faker
-from collections import defaultdict
+from collections import defaultdict, Counter
+from itertools import chain
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('urls', metavar='URL', nargs='*',
                    help='URLs to Moss result pages.')
 parser.add_argument('--min-percent', '-p', dest='min_percent', metavar='P', type=int, default=90,
-                   help='All matches where less than P%% of both files are matched are ignored. (Default: 90)')
+                   help='All matches where less than P%% of both files are matched are ignored. (Default: %(default)s)')
 parser.add_argument('--min-lines', '-l', dest='min_lines', metavar='L', type=int, default=1,
-                   help='All matches where fewer than L lines are matched are ignored. (Default: 1)')
+                   help='All matches where fewer than L lines are matched are ignored. (Default: %(default)s)')
 parser.add_argument('--format', '-f', default='png', help='Format of output files. See Graphviz documentation.')
 parser.add_argument('--transformer', '-t', default='.*',
                    help='A regular expression that is used to transform the name of them matched files.')
@@ -56,6 +57,8 @@ parser.add_argument('--filterx', metavar='N', nargs='+', default=None,
                    help='Exclude matches between these names.')
 parser.add_argument('--filterxi', metavar='N', nargs='+', default=None,
                    help='Exclude matches involving any of these names.')
+parser.add_argument('--min-matches', metavar='N', default=1, type=int,
+                   help='Show only files with N or more matces between each other. This is only applicable to merged results. (Default: %(default)s).')
 
 
 class Results:
@@ -185,9 +188,15 @@ def generate_report(results):
             f.write('\n\n')
 
 
+def merge_filter(matches):
+    pairs = [ tuple(sorted([match.first.name, match.second.name])) for match in matches ]
+    intereseting = {pair for pair, count in Counter(pairs).items() if count >= args.min_matches}
+    return [match for match in matches if tuple(sorted([match.first.name, match.second.name])) in intereseting]
+
+
 def merge_results(results):
     name = '+'.join(map(lambda x:x.name, results))
-    matches = sum(map(lambda x:x.matches, results), [])
+    matches = merge_filter(list(chain(*map(lambda x:x.matches, results))))
     return Results(name, matches)
 
 
@@ -218,7 +227,7 @@ def get_results(moss_url):
     return Results(name, matches)
 
 
-def image(results):
+def image(results, index=None):
     graph = pydot.Dot(graph_type='graph')
 
     print('Generating image for %s' % results.name)
@@ -241,6 +250,8 @@ def image(results):
 
     if args.output:
         name = args.output
+        if index is not None:
+            name = '%s-%d' % (name, index)
     else:
         name = results.name
     filename = '%s.%s' % (name, args.format)
@@ -274,10 +285,10 @@ def main():
             anonymize(merged.matches)
         image(merged)
     else:
-        for res in all_res:
+        for i, res in enumerate(all_res):
             if args.anonymize:
                 anonymize(res.matches)
-            image(res)
+            image(res, i+1)
 
     if args.report:
         generate_report(all_res)
