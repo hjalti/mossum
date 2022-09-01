@@ -96,22 +96,23 @@ class Filter:
 
         for f in filters:
             if getattr(args, f) != None:
-                setattr(self, f, set(getattr(args, f)))
-
+                regexp = '(?:% s)' % '|'.join(set(getattr(args, f)))
+                setattr(self, f, regexp)
+        
     def include(self, match):
         first = match.first.name
         second = match.second.name
-        if (self.filter is not None and (first not in self.filter or second not
-                                         in self.filter)):
+        if (self.filter is not None and (not re.match(self.filter, first) 
+                                         or not re.match(self.filter, second))):
             return False
-        if (self.filteri is not None and (first not in self.filteri and second
-                                          not in self.filteri)):
+        if (self.filteri is not None and (not re.match(self.filteri, first) 
+                                          and not re.match(self.filteri, second))):
             return False
-        if (self.filterx is not None and (first in self.filterx and second in
-                                          self.filterx)):
+        if (self.filterx is not None and (re.match(self.filterx, first)
+                                          and re.match(self.filterx, second))):
             return False
-        if (self.filterxi is not None and (first in self.filterxi or second in
-                                           self.filterxi)):
+        if (self.filterxi is not None and (re.match(self.filterxi, first)
+                                          or re.match(self.filterxi, second))):
             return False
         return match.lines > args.min_lines and (match.first.percent > args.min_percent or
                                                  match.second.percent > args.min_percent)
